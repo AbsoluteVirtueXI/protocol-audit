@@ -99,7 +99,7 @@ let keystore = Keystore::new(password.as_str());
 ### Modularity
 
 Library code and binary code should be separated to enhance modularity, readability and maintenance.
-`main.rs` should only contain minimum code to launch the program, and import modules and functionnalities from `lib.rs` crate.
+`main.rs` should only contain minimum code to launch the program, and import modules, types and functionnalities from `lib.rs` crate.
 
 Put `Keystore` struct and implementation, and all its related dependencies, in a file named `lib.rs`.
 Add `pub` visibility specifier for `Keystore` struct.
@@ -159,7 +159,7 @@ code remaining in `main.rs`:
 _main.rs_:
 
 ```rust
-use keystore_update::Keystore;
+use keystore::Keystore;
 use std::env;
 use std::process::exit;
 
