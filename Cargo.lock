@@ -216,6 +216,15 @@ dependencies = [
 [[package]]
 name = "keystore-update"
 version = "0.1.0"
+dependencies = [
+ "fastrand",
+ "hex",
+ "k256",
+ "md5",
+ "rand_core 0.6.4",
+ "rust-crypto",
+ "rustc-serialize",
+]
 
 [[package]]
 name = "libc"
