@@ -52,6 +52,7 @@ edition = "2021"
   Use an IDE extension like [crates](https://marketplace.visualstudio.com/items?itemName=serayuzgur.crates) for VSCode, the builtin `cargo search` command for finding last releases of crates or manually search for a crate on https://crates.io and follow install instructions.
 
 _`crates` extension output on VSCode IDE_:
+
 ![crates output](res/crates_output.png)
 
 _output of_ `cargo search k256 --limit 3` \_command\_:
