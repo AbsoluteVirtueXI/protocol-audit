@@ -55,7 +55,7 @@ _`crates` extension output on VSCode IDE_:
 
 ![crates output](res/crates_output.png)
 
-_output of_ `cargo search k256 --limit 3` \_command\_:
+_output of_ `cargo search k256 --limit 3` _command_ :
 
 ```zsh
 $ cargo search k256 --limit 3
