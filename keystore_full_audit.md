@@ -74,7 +74,7 @@ Add the following line to your Cargo.toml file:
 k256 = "0.11.5"
 ```
 
-\*\*Important Security Warning\*\*:
+**Important Security Warning**:
 
 `k256` is an unaudited package. We just showed how to get the last version of the package, but for security reason, and particulary for application using cryptography you should use an alternative. See our security analysis below for more information. TODO LINK TO SEC HERE.
 
