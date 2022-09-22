@@ -4,12 +4,12 @@
 
 This report is a quality and security audit of the crate [keystore](./keystore).  
 We provide first a code quality analysis without consideration of security flaws, as quality applied even for a flawed code.  
-We follow with a security analysis.  
+We follow then with a security analysis of the code.  
 A corrected version of the crate `keystore` with quality and security considerations applied can be found at [keystore-update](./keystore-update).
 
 ## Quality audit
 
-Without an internal convention written for this project, we assume rust official conventions should be followed for rust syntax and design.
+Without an internal coding style and convention written for this project, we assume rust official and communauty known conventions should be followed for rust syntax and design.
 
 ### Cargo.toml
 
@@ -78,6 +78,100 @@ k256 = "0.11.5"
 
 `k256` is an unaudited package. We just showed how to get the last version of the package, but for security reason, and particulary for application using cryptography you should use an alternative. See our security analysis below for more information. TODO LINK TO SEC HERE.
 
+### Encapsulation
+
+The function `keystore_create` at line 20 should be an associated function implemented for the `Keystore` struct.
+As this function is a constructor that create Keystore instance, it is good practice to name it `new`.
+
+```rust
+impl Keystore {
+    pub fn new(password: &str) -> Keystore {
+        /* */
+    }
+```
+
+in function `main` `Keystore` can now be instantiated with:
+
+```rust
+let keystore = Keystore::new(password.as_str());
+```
+
+### Modularity
+
+Library code and binary code should be separated to enhance modularity, readability and maintenance.
+`main.rs` should only contain minimum code to launch the program, and import modules and functionnalities from `lib.rs` crate.
+
+Put `Keystore` struct and implementation, and all its related dependencies, in a file named `lib.rs`.
+Add `pub` visibility specifier for `Keystore` struct.
+
+_lib.rs_:
+
+```rust
+use crypto::aead::{AeadDecryptor, AeadEncryptor};
+use crypto::aes_gcm::AesGcm;
+use k256::ecdsa::SigningKey;
+use rustc_serialize::hex::FromHex;
+use std::iter::repeat;
+use std::iter::repeat_with;
+
+type Digest = String;
+type Key = String;
+
+#[derive(Debug)]
+pub struct Keystore {
+    digest: Digest,
+    sk: Key,
+    pk: Key,
+}
+
+impl Keystore {
+    pub fn new(password: &str) -> Keystore {
+        let digest = md5::compute(password);
+
+        let rnd: Vec<u8> = repeat_with(|| fastrand::i8(..))
+            .take(32)
+            .map(|v| v as u8)
+            .collect();
+        let signing_key = SigningKey::from_bytes(&rnd);
+        let sk = signing_key.unwrap().to_bytes();
+        let mut key = digest.to_ascii_lowercase();
+        let mut data = sk.to_ascii_lowercase();
+        let data_add = sk;
+        let mut iv = "000000000000000000000000";
+
+        let key_size = crypto::aes::KeySize::KeySize128;
+        let mut aes = AesGcm::new(key_size, &key, &iv.from_hex().unwrap(), &data_add);
+        let mut output: Vec<u8> = repeat(0).take(data.len()).collect();
+        let mut output_tag: Vec<u8> = repeat(0).take(16).collect();
+        aes.encrypt(&data, &mut output[..], &mut output_tag[..]);
+
+        let k = Keystore {
+            digest: format!("0x{}", hex::encode(digest.to_vec())),
+            sk: format!("0x{}", hex::encode(sk)),
+            pk: hex::encode(output),
+        };
+        k
+    }
+}
+```
+
+code remaining in `main.rs`:
+_main.rs_:
+
+```rust
+use keystore_update::Keystore;
+use std::env;
+use std::process::exit;
+
+fn main() {
+    fastrand::seed(0);
+    let password = env::var("HOME").unwrap();
+    let keystore = Keystore::new(password.as_str());
+    println!("{:?}", keystore);
+    exit(1);
+}
+```
+
 ### Consistency in code formating
 
 Readablity can be improve by consistency in formating
@@ -88,10 +182,6 @@ Readablity can be improve by consistency in formating
 ### Clippy
 
 a clippy run
-
-### Modularity
-
-- separate lib code and bin code
 
 ### Consistency in import
 

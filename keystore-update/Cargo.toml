@@ -2,12 +2,16 @@
 name = "keystore-update"
 version = "0.1.0"
 edition = "2021"
+authors = ["Sofiane Akermoun <akersof@gmail.com>"]
+homepage = "https://github.com/AbsoluteVirtueXI/protocol-audit/tree/main/keystore-update"
+repository = "https://github.com/AbsoluteVirtueXI/protocol-audit/tree/main/keystore-update"
+license = "MIT OR Apache-2.0"
 
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-k256="0.9.6"
+k256="0.9.6" #TODO UPGRADE HERE
 hex="0.4.3"
 rand_core="0.6.3"
 fastrand="1.7.0"
