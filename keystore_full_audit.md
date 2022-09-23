@@ -9,7 +9,7 @@ A corrected version of the crate `keystore` with quality and security considerat
 
 ## Quality audit
 
-Without an internal coding style and convention written for this project, we assume rust official and communauty known conventions should be followed for rust syntax and design.
+Without an internal coding style and convention written for this project, we assume that rust official and communauty known conventions should be followed for rust syntax and design.
 
 ### Cargo.toml
 
@@ -49,6 +49,7 @@ edition = "2021"
 ```
 
 - Outdated crate `k256`. The version used is `0.9.6` and the last version is `0.11.5`.
+  A Lot of fixes were added post `0.9.6` releases and can be found in the [CHANGELOG.md](https://github.com/RustCrypto/elliptic-curves/blob/master/k256/CHANGELOG.md) file.
   Use an IDE extension like [crates](https://marketplace.visualstudio.com/items?itemName=serayuzgur.crates) for VSCode, the builtin `cargo search` command for finding last releases of crates or manually search for a crate on https://crates.io and follow install instructions.
 
 _`crates` extension output on VSCode IDE_:
@@ -81,12 +82,12 @@ k256 = "0.11.5"
 ### Encapsulation
 
 The function `keystore_create` at line 20 should be an associated function implemented for the `Keystore` struct.
-As this function is a constructor that create Keystore instance, it is good practice to name it `new`.
+As this function is a constructor that create `Keystore` instance, it is good practice to name it `new`.
 
 ```rust
 impl Keystore {
     pub fn new(password: &str) -> Keystore {
-        /* */
+        /* code goes here */
     }
 ```
 
@@ -174,16 +175,19 @@ fn main() {
 
 ### Consistency in code formating
 
-Readablity can be improve by consistency in formating
+Readablity can be improve by consistency in formating and a 4 spaces indentation.
+Configure your IDE and install [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer) extension or install and use the [rustfmt](https://github.com/rust-lang/rustfmt) command line.
 
-- indentation
-- rustfmt
+```zsh
+$ rustup component add rustfmt
+$ cargo fmt
+```
 
 ### Clippy
 
 a clippy run
 
-### Consistency in import
+### Consistency in import and naming convention
 
 ### Variable mutability
 
@@ -191,9 +195,35 @@ a clippy run
 
 ### Comment
 
-### Documentation comment
+The code contains no comment.
+Comments should be added at least for explaining the usage of cryptographic functions and computations for creating a new `Keystore` instance.
+
+### Documentation comments
+
+Documentation comments should be added for documentation generation.
+We suggest adding documentation comments for:
+
+- Describing the crate in general.
+- Describing each modules, these doc comments goes at top level of each modules.
+- Describing the `Keystore` struct, each fields and code snippets for usage.
+- Describing each functions/methods and their parameters, and add code snippets for usage.
+
+With these doc comments added you generate code documentation at compilation or directly with:
+
+```zsh
+cargo doc
+```
+
+Use `--open` option to directly open the new generated documentation in your browser.
 
 ### Unit testing
+
+There is a single unit test.
+Rust crate ca
+
+### Integration testing
+
+no need
 
 ### Portability
 
