@@ -1,13 +1,13 @@
-# keystore quality and security code audit
+# **keystore quality and security code audit**
 
-## Executive summary
+# Executive summary
 
 This report is a quality and security audit of the crate [keystore](./keystore).  
 We provide first a code quality analysis without consideration of security flaws, as quality applied even for an insecure code.  
 We follow then with a security analysis of the code.  
 A corrected version of the crate `keystore` with quality and security considerations applied can be found at [keystore-update](./keystore-update).
 
-## Quality audit
+# Quality audit
 
 Without an internal coding style and convention written for this project, we assume that rust official and community known conventions should be followed for rust syntax and design.  
 We use an hybrid approach with a manual audit based on our Rust and software architecture expertise and an automated analysis based on [clippy](https://github.com/rust-lang/rust-clippy) linter for highlighting common mistake in Rust code.  
@@ -15,9 +15,9 @@ For more details on Rust common conventions and Rust style guide please read:
 https://rust-lang.github.io/api-guidelines  
 https://github.com/rust-dev-tools/fmt-rfcs/blob/master/guide/guide.md
 
-### Cargo.toml
+## Cargo.toml
 
-#### package section
+### package section
 
 - Use a meaningful package name like `keystore` instead of `app2` for the field `name` or at least use a `[[bin]]` target to generate a binary with a meaningful name:
 
@@ -43,7 +43,7 @@ edition = "2021"
 - Important metadata are missing. `authors`, `license`, `repository`, `documentation`, and more fields should be filled with correct values.
   Please see https://doc.rust-lang.org/cargo/reference/manifest.html#the-package-section for more information.
 
-#### dependencies section
+### dependencies section
 
 - Remove commented dependency at line 10 and the useless blank line at line 11:
 
@@ -83,7 +83,7 @@ k256 = "0.11.5"
 
 `k256` is an unaudited package. We just showed how to get the last version of the package, but for security reason, and particularly for application using cryptography you should use an alternative. See our security analysis below for more information. TODO LINK TO SEC HERE.
 
-### Encapsulation
+## Encapsulate `keystore_create` in `Keystore` struct as an associated function.
 
 The function `keystore_create` at line 20 should be an associated function implemented for the `Keystore` struct.
 As this function is a constructor that create `Keystore` instance, it is good practice to name it `new`.
@@ -101,7 +101,7 @@ in function `main` `Keystore` can now be instantiated with:
 let keystore = Keystore::new(password.as_str());
 ```
 
-### Modularity
+## Add modularity by using the library crate for `Keystore` type and its associated methods and functions.
 
 Library code and binary code should be separated to enhance modularity, readability and maintenance.
 `main.rs` should only contain minimum code to launch the program, and import modules, types and functionalities from the library crate (`lib.rs`).
@@ -177,7 +177,7 @@ fn main() {
 }
 ```
 
-### Consistency in code formating
+## Inconsistency in code formatting
 
 Readability can be improved by consistency in formatting and a 4 spaces indentation.
 Configure your IDE and install [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer) extension or install and use the [rustfmt](https://github.com/rust-lang/rustfmt) command line.
@@ -187,7 +187,7 @@ $ rustup component add rustfmt
 $ cargo fmt
 ```
 
-### Unused import `AeadDecryptor`
+## Unused import `AeadDecryptor`
 
 At line 1, the import of `AeadDecryptor` trait from `crypto::aead` is not used.  
 Change line 1 to:
@@ -196,7 +196,7 @@ Change line 1 to:
 use crypto::aead::AeadEncryptor;
 ```
 
-### Import of `std::iter` and relative path `iter::repeat` and `iter::repeat_with`
+## Import of `std::iter` and relative path `iter::repeat` and `iter::repeat_with`
 
 Relative path should be used for calling `repeat` and `repeat_with` functions.  
 The style in Rust is to import types, traits, and modules (std::iter) and then use relative paths to access the functions, constants, and other members within.
@@ -224,29 +224,46 @@ let mut output_tag: Vec<u8> = iter::repeat(0).take(16).collect();
 
 Same pattern should be applied for the `std::process` module and the function `exit`, but as we will see in TODO LINK, we recommend to remove the import of `std::process` and the call to the `exit` function.
 
-### Unused mutable let bindings.
+## Unused mutable let bindings.
 
 The keyword `mut` is used for let bindings which don't need to be mutable.  
 Variables `key`, `data` and `iv` do not need to be mutable, remove `mut` keyword from the associated `let` bindings.  
 TODO: more info on `iv` meaning and type (static?);
 
-### Restricted portability due to the usage of `HOME` environment variable.
+## Restricted portability due to the usage of `HOME` environment variable.
 
-At line 50 the usage of the `HOME` environment variable restrict the program to run correctly only on Linux/Unix/BSD based operating systems as this environment variable is only set by default on those OS.
+At line 50 the usage of the `HOME` environment variable restrict the program to run correctly only on Linux/Unix/BSD based operating systems as this environment variable is only set by default on those OS.  
 Use another environnement variable, and preferably an environnement variable created and set by the program itself.
 
-### Program termination and exit code.
+**Important Security Warning**:  
+The line 50 `let password = env::var("HOME").unwrap();` introduces critical security vulnerabilities.  
+Please check TODO LINK SEC before working around this quality issue.
+
+## Unnecessary `let` binding `k`
+
+The `let` binding `k` defined at line 40 is returned directly at line 45 within `keystore_create` function.  
+It is extraneous code. Remove it to make your code more rusty and return directly the `Keystore` instantiation expression.
+
+```rust
+Keystore {
+            digest: format!("0x{}", hex::encode(digest.to_vec())),
+            sk: format!("0x{}", hex::encode(sk)),
+            pk: hex::encode(output),
+        }
+```
+
+## Program termination and exit code.
 
 The usage of the `std::process::exit` function, at line 53, is not needed as it is always called as the last statement of the program.  
 `std::process:exit` is a very good option for terminating a program based on some conditions for an early exit and a variable exit code.
 Moreover the exit code `1` is a common convention for a catchall for general errors, which is not the case in the current program as it exits successfully without internal errors.
 
-### Comment
+## Comment
 
 The code contains no comment.  
 Comments should be added at least for explaining the usage of cryptographic functions and computations for creating a new `Keystore` instance.
 
-### Documentation comments
+## Documentation comments
 
 Documentation comments should be added for documentation generation.  
 We suggest adding documentation comments for:
@@ -264,7 +281,7 @@ cargo doc
 
 Use `--open` option to directly open the new generated documentation in your browser.
 
-### Unit testing
+## Unit testing
 
 There is a not single unit test.
 Add unit tests for the `keystore_create` function, edge cases should be covered.
@@ -285,10 +302,6 @@ mod tests {
 
 By following our recommendations in the `Modularity` section, unit tests can be written per module which permit a better granularity for testing software components.
 
-**Important Security Warning**:
-The line 50 `let password = env::var("HOME").unwrap();` introduce critical security vulnerabilities.  
-Please check TODO LINK SEC before working around this quality issue.
+# Security
 
-## Security
-
-### report overview
+## report overview

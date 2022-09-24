@@ -35,12 +35,11 @@ impl Keystore {
         let mut output_tag: Vec<u8> = iter::repeat(0).take(16).collect();
         aes.encrypt(&data, &mut output[..], &mut output_tag[..]);
 
-        let k = Keystore {
+        Keystore {
             digest: format!("0x{}", hex::encode(digest.to_vec())),
             sk: format!("0x{}", hex::encode(sk)),
             pk: hex::encode(output),
-        };
-        k
+        }
     }
 }
 
