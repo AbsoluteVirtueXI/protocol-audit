@@ -20,11 +20,11 @@ https://github.com/rust-dev-tools/fmt-rfcs/blob/master/guide/guide.md
 - [Cargo.toml](#cargotoml)
   - [package section](#package-section)
   - [dependencies section](#dependencies-section)
-- [Encapsulate keystore_create in Keystore struct as an associated function.](#encapsulate-keystorecreate-in-keystore-struct-as-an-associated-function)
-- [Add modularity by using the library crate for Keystore type and its associated methods and functions.](#add-modularity-by-using-the-library-crate-for-keystore-type-and-its-associated-methods-and-functions)
+- [Encapsulate `keystore_create` in `Keystore` struct as an associated function](#encapsulate-keystore_create-in-keystore-struct-as-an-associated-function)
+- [Add modularity by using the library crate for `Keystore` type and its associated methods and functions](#add-modularity-by-using-the-library-crate-for-keystore-type-and-its-associated-methods-and-functions)
 - [Inconsistency in code formatting](#inconsistency-in-code-formatting)
 - [Unused import `AeadDecryptor`](#unused-import-aeaddecryptor)
-- [Import of `std::iter` and relative path `iter::repeat` and `iter::repeat_with`](#import-of-stditer-and-relative-path-iterrepeat-and-iterrepeatwith)
+- [Import of `std::iter` and relative path `iter::repeat` and `iter::repeat_with`](#import-of-stditer-and-relative-path-iterrepeat-and-iterrepeat_with)
 - [Unused mutable let bindings](#unused-mutable-let-bindings)
 - [Restricted portability due to the usage of `HOME` environment variable](#restricted-portability-due-to-the-usage-of-home-environment-variable)
 - [Unnecessary `let` binding `k`](#unnecessary-let-binding-k)
@@ -195,7 +195,7 @@ fn main() {
 }
 ```
 
-## Inconsistency in code formatting
+## Inconsistency in code formatting.
 
 Readability can be improved by consistency in formatting and a 4 spaces indentation.
 Configure your IDE and install [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer) extension or install and use the [rustfmt](https://github.com/rust-lang/rustfmt) command line.
@@ -205,7 +205,7 @@ $ rustup component add rustfmt
 $ cargo fmt
 ```
 
-## Unused import `AeadDecryptor`
+## Unused import `AeadDecryptor`.
 
 At line 1, the import of `AeadDecryptor` trait from `crypto::aead` is not used.  
 Change line 1 to:
@@ -214,7 +214,7 @@ Change line 1 to:
 use crypto::aead::AeadEncryptor;
 ```
 
-## Import of `std::iter` and relative path `iter::repeat` and `iter::repeat_with`
+## Import of `std::iter` and relative path `iter::repeat` and `iter::repeat_with`.
 
 Relative path should be used for calling `repeat` and `repeat_with` functions.  
 The style in Rust is to import types, traits, and modules (std::iter) and then use relative paths to access the functions, constants, and other members within.
@@ -319,7 +319,7 @@ mod tests {
 }
 ```
 
-By following our recommendations in the `Modularity` section, unit tests can be written per module which permit a better granularity for testing software components.
+By following our recommendations in the [Add modularity by using the library crate for `Keystore` type and its associated methods and functions](#add-modularity-by-using-the-library-crate-for-keystore-type-and-its-associated-methods-and-functions) section, unit tests can be written per module which permit a better granularity for testing software components.
 
 # Security
 
