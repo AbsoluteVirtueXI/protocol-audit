@@ -10,7 +10,7 @@ A corrected version of the crate `keystore` with quality and security considerat
 # Quality audit
 
 Without an internal coding style and convention written for this project, we assume that rust official and community known conventions should be followed for rust syntax and design.  
-We use an hybrid approach with a manual audit based on our Rust and software architecture expertise and an automated analysis based on [clippy](https://github.com/rust-lang/rust-clippy) linter for highlighting common mistake in Rust code.  
+We have used an hybrid approach with a manual audit based on our Rust and software architecture expertise and an automated analysis based on [clippy](https://github.com/rust-lang/rust-clippy) linter for highlighting common mistake in Rust code.  
 For more details on Rust common conventions and Rust style guide please read:  
 https://rust-lang.github.io/api-guidelines  
 https://github.com/rust-dev-tools/fmt-rfcs/blob/master/guide/guide.md
