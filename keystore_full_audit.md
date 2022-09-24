@@ -11,13 +11,31 @@ A corrected version of the crate `keystore` with quality and security considerat
 
 Without an internal coding style and convention written for this project, we assume that rust official and community known conventions should be followed for rust syntax and design.  
 We use an hybrid approach with a manual audit based on our Rust and software architecture expertise and an automated analysis based on [clippy](https://github.com/rust-lang/rust-clippy) linter for highlighting common mistake in Rust code.  
-For more details on Rust common conventions and Rust style guide please read:
+For more details on Rust common conventions and Rust style guide please read:  
 https://rust-lang.github.io/api-guidelines  
 https://github.com/rust-dev-tools/fmt-rfcs/blob/master/guide/guide.md
 
+**Code quality audit summary**:
+
+- [Cargo.toml](#cargotoml)
+  - [[package] section](#package-section)
+  - [[dependencies] section](#dependencies-section)
+- [Encapsulate `keystore_create` in `Keystore` struct as an associated function.](#encapsulate-keystorecreate-in-keystore-struct-as-an-associated-function)
+- [Add modularity by using the library crate for `Keystore` type and its associated methods and functions.](#add-modularity-by-using-the-library-crate-for-keystore-type-and-its-associated-methods-and-functions)
+- [Inconsistency in code formatting](#inconsistency-in-code-formatting)
+- [Unused import `AeadDecryptor`](#unused-import-aeaddecryptor)
+- [Import of `std::iter` and relative path `iter::repeat` and `iter::repeat_with`](#import-of-stditer-and-relative-path-iterrepeat-and-iterrepeatwith)
+- [Unused mutable let bindings](#unused-mutable-let-bindings)
+- [Restricted portability due to the usage of `HOME` environment variable](#restricted-portability-due-to-the-usage-of-home-environment-variable)
+- [Unnecessary `let` binding `k`](#unnecessary-let-binding-k)
+- [Redundant program termination scheme with a bad exit code](#redundant-program-termination-scheme-with-a-bad-exit-code)
+- [Comments](#comments)
+- [Documentation comments](#documentation-comments)
+- [Unit testing](#unit-testing)
+
 ## Cargo.toml
 
-### package section
+### [package] section.
 
 - Use a meaningful package name like `keystore` instead of `app2` for the field `name` or at least use a `[[bin]]` target to generate a binary with a meaningful name:
 
@@ -43,7 +61,7 @@ edition = "2021"
 - Important metadata are missing. `authors`, `license`, `repository`, `documentation`, and more fields should be filled with correct values.
   Please see https://doc.rust-lang.org/cargo/reference/manifest.html#the-package-section for more information.
 
-### dependencies section
+### [dependencies] section.
 
 - Remove commented dependency at line 10 and the useless blank line at line 11:
 
@@ -222,13 +240,13 @@ let mut output: Vec<u8> = iter::repeat(0).take(data.len()).collect();
 let mut output_tag: Vec<u8> = iter::repeat(0).take(16).collect();
 ```
 
-Same pattern should be applied for the `std::process` module and the function `exit`, but as we will see in TODO LINK, we recommend to remove the import of `std::process` and the call to the `exit` function.
+Same pattern should be applied for the `std::process` module and the function `exit`, but as we will see in [Redundant program termination scheme with a bad exit code](#redundant-program-termination-scheme-with-a-bad-exit-code), we recommend to remove the import of `std::process` and the call to the `exit` function.
 
 ## Unused mutable let bindings.
 
 The keyword `mut` is used for let bindings which don't need to be mutable.  
 Variables `key`, `data` and `iv` do not need to be mutable, remove `mut` keyword from the associated `let` bindings.  
-TODO: more info on `iv` meaning and type (static?);
+TODO LINK SEC: more info on `iv` meaning, type (static?) and security issue;
 
 ## Restricted portability due to the usage of `HOME` environment variable.
 
@@ -239,7 +257,7 @@ Use another environnement variable, and preferably an environnement variable cre
 The line 50 `let password = env::var("HOME").unwrap();` introduces critical security vulnerabilities.  
 Please check TODO LINK SEC before working around this quality issue.
 
-## Unnecessary `let` binding `k`
+## Unnecessary `let` binding `k`.
 
 The `let` binding `k` defined at line 40 is returned directly at line 45 within `keystore_create` function.  
 It is extraneous code. Remove it to make your code more rusty and return directly the `Keystore` instantiation expression.
@@ -252,20 +270,21 @@ Keystore {
         }
 ```
 
-## Program termination and exit code.
+## Redundant program termination scheme with a bad exit code.
 
-The usage of the `std::process::exit` function, at line 53, is not needed as it is always called as the last statement of the program.  
-`std::process:exit` is a very good option for terminating a program based on some conditions for an early exit and a variable exit code.
+Remove import `use std::process::exit;` at line 8 and remove the call of `exit` function at line 53.  
+The usage of the `std::process::exit` function, at line 53, is not needed as it is called as the last statement of the program.  
+`std::process:exit` is a very good option for terminating a program based on some conditions for an early exit with a variable exit code, which is unnecessary in the actual program.  
 Moreover the exit code `1` is a common convention for a catchall for general errors, which is not the case in the current program as it exits successfully without internal errors.
 
-## Comment
+## Comments
 
 The code contains no comment.  
 Comments should be added at least for explaining the usage of cryptographic functions and computations for creating a new `Keystore` instance.
 
 ## Documentation comments
 
-Documentation comments should be added for documentation generation.  
+Documentation comments should be added for automatic documentation generation.  
 We suggest adding documentation comments for:
 
 - Describing the crate in general.
