@@ -18,10 +18,10 @@ https://github.com/rust-dev-tools/fmt-rfcs/blob/master/guide/guide.md
 **Code quality audit summary**:
 
 - [Cargo.toml](#cargotoml)
-  - [[package] section](#package-section)
-  - [[dependencies] section](#dependencies-section)
-- [Encapsulate `keystore_create` in `Keystore` struct as an associated function.](#encapsulate-keystorecreate-in-keystore-struct-as-an-associated-function)
-- [Add modularity by using the library crate for `Keystore` type and its associated methods and functions.](#add-modularity-by-using-the-library-crate-for-keystore-type-and-its-associated-methods-and-functions)
+  - [package section](#package-section)
+  - [dependencies section](#dependencies-section)
+- [Encapsulate keystore_create in Keystore struct as an associated function.](#encapsulate-keystorecreate-in-keystore-struct-as-an-associated-function)
+- [Add modularity by using the library crate for Keystore type and its associated methods and functions.](#add-modularity-by-using-the-library-crate-for-keystore-type-and-its-associated-methods-and-functions)
 - [Inconsistency in code formatting](#inconsistency-in-code-formatting)
 - [Unused import `AeadDecryptor`](#unused-import-aeaddecryptor)
 - [Import of `std::iter` and relative path `iter::repeat` and `iter::repeat_with`](#import-of-stditer-and-relative-path-iterrepeat-and-iterrepeatwith)
