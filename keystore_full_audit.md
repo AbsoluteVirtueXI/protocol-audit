@@ -3,13 +3,17 @@
 ## Executive summary
 
 This report is a quality and security audit of the crate [keystore](./keystore).  
-We provide first a code quality analysis without consideration of security flaws, as quality applied even for a flawed code.  
+We provide first a code quality analysis without consideration of security flaws, as quality applied even for an insecure code.  
 We follow then with a security analysis of the code.  
 A corrected version of the crate `keystore` with quality and security considerations applied can be found at [keystore-update](./keystore-update).
 
 ## Quality audit
 
-Without an internal coding style and convention written for this project, we assume that rust official and communauty known conventions should be followed for rust syntax and design.
+Without an internal coding style and convention written for this project, we assume that rust official and community known conventions should be followed for rust syntax and design.  
+We use an hybrid approach with a manual audit based on our Rust and software architecture expertise and an automated analysis based on [clippy](https://github.com/rust-lang/rust-clippy) linter for highlighting common mistake in Rust code.  
+For more details on Rust common conventions and Rust style guide please read:
+https://rust-lang.github.io/api-guidelines  
+https://github.com/rust-dev-tools/fmt-rfcs/blob/master/guide/guide.md
 
 ### Cargo.toml
 
@@ -36,7 +40,7 @@ path = "src/main.rs"
 edition = "2021"
 ```
 
-- Important metada are missing. `authors`, `licence`, `repository`, `documentation`, and more fields should be filled with correct values.
+- Important metadata are missing. `authors`, `license`, `repository`, `documentation`, and more fields should be filled with correct values.
   Please see https://doc.rust-lang.org/cargo/reference/manifest.html#the-package-section for more information.
 
 #### dependencies section
@@ -77,7 +81,7 @@ k256 = "0.11.5"
 
 **Important Security Warning**:
 
-`k256` is an unaudited package. We just showed how to get the last version of the package, but for security reason, and particulary for application using cryptography you should use an alternative. See our security analysis below for more information. TODO LINK TO SEC HERE.
+`k256` is an unaudited package. We just showed how to get the last version of the package, but for security reason, and particularly for application using cryptography you should use an alternative. See our security analysis below for more information. TODO LINK TO SEC HERE.
 
 ### Encapsulation
 
@@ -100,10 +104,10 @@ let keystore = Keystore::new(password.as_str());
 ### Modularity
 
 Library code and binary code should be separated to enhance modularity, readability and maintenance.
-`main.rs` should only contain minimum code to launch the program, and import modules, types and functionnalities from `lib.rs` crate.
+`main.rs` should only contain minimum code to launch the program, and import modules, types and functionalities from the library crate (`lib.rs`).
 
-Put `Keystore` struct and implementation, and all its related dependencies, in a file named `lib.rs`.
-Add `pub` visibility specifier for `Keystore` struct.
+Put `Keystore` struct and implementation, and all its related dependencies, in a file named `lib.rs` or in a dedicated submodule.
+Add `pub` visibility specifier for `Keystore` struct and make it usable from the binary crate.
 
 _lib.rs_:
 
@@ -175,7 +179,7 @@ fn main() {
 
 ### Consistency in code formating
 
-Readablity can be improve by consistency in formating and a 4 spaces indentation.
+Readability can be improved by consistency in formatting and a 4 spaces indentation.
 Configure your IDE and install [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer) extension or install and use the [rustfmt](https://github.com/rust-lang/rustfmt) command line.
 
 ```zsh
@@ -183,24 +187,63 @@ $ rustup component add rustfmt
 $ cargo fmt
 ```
 
-### Clippy
+### Unused import `AeadDecryptor`
 
-a clippy run
+At line 1, the import of `AeadDecryptor` trait from `crypto::aead` is not used.  
+Change line 1 to:
 
-### Consistency in import and naming convention
+```rust
+use crypto::aead::AeadEncryptor;
+```
 
-### Variable mutability
+### Import of `std::iter` and relative path `iter::repeat` and `iter::repeat_with`
 
-### Program exit and error code
+Relative path should be used for calling `repeat` and `repeat_with` functions.  
+The style in Rust is to import types, traits, and modules (std::iter) and then use relative paths to access the functions, constants, and other members within.
+
+Change line 6 and 7 to:
+
+```rust
+use std::iter;
+```
+
+And then use relative path for calling functions `repeat` and `repeat_with` in line 23, 36 and 37:
+
+line 23: _main.rs_
+
+```rust
+let rnd: Vec<u8> = iter::repeat_with(|| fastrand::i8(..))
+```
+
+line 36 and 37 in _main.rs_:
+
+```rust
+let mut output: Vec<u8> = iter::repeat(0).take(data.len()).collect();
+let mut output_tag: Vec<u8> = iter::repeat(0).take(16).collect();
+```
+
+Same pattern should be applied for the `std::process` module and the function `exit`, but as we will see in TODO LINK, we recommend to remove the import of `std::process` and the call to the `exit` function.
+
+### Unused mutable let bindings.
+
+The keyword `mut` is used for let bindings which don't need to be mutable.  
+Variables `key`, `data` and `iv` do not need to be mutable, remove `mut` keyword from the associated `let` bindings.  
+TODO: more info on `iv` meaning and type (static?);
+
+### Program termination and exit code.
+
+The usage of the `std::process::exit` function, at line 53, is not needed as it is always called as the last statement of the program.  
+`std::process:exit` is a very good option for terminating a program based on some conditions for an early exit and a variable exit code.
+Moreover the exit code `1` is a common convention for a catchall for general errors, which is not the case in the current program as it exits successfully without internal errors.
 
 ### Comment
 
-The code contains no comment.
+The code contains no comment.  
 Comments should be added at least for explaining the usage of cryptographic functions and computations for creating a new `Keystore` instance.
 
 ### Documentation comments
 
-Documentation comments should be added for documentation generation.
+Documentation comments should be added for documentation generation.  
 We suggest adding documentation comments for:
 
 - Describing the crate in general.
@@ -218,24 +261,34 @@ Use `--open` option to directly open the new generated documentation in your bro
 
 ### Unit testing
 
-There is a single unit test.
-Rust crate ca
+There is a not single unit test.
+Add unit tests for the `keystore_create` function, edge cases should be covered.
 
-### Integration testing
+At the end of `main.rs` add:
 
-no need
+```rust
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-### Portability
+    #[test]
+    fn should_create_keystore() {
+       /* test code goes here */
+    }
+}
+```
 
-### notes
+By following our recommendations in the `Modularity` section, unit tests can be written per module which permit a better granularity for testing software components.
 
-https://github.com/rust-dev-tools/fmt-rfcs/blob/master/guide/guide.md
-https://rust-lang.github.io/api-guidelines/
+### Restricted portability due to the usage of `HOME` environment variable.
+
+At line 50 the usage of the `HOME` environment variable restrict the program to run correctly only on Linux/Unix/BSD based operating systems as this environment variable is only set by default on those OS.
+Use another environnement variable, and preferably an environnement variable created and set by the program itself.
+
+**Important Security Warning**:
+The line 50 `let password = env::var("HOME").unwrap();` introduce critical security vulnerabilities.  
+Please check TODO LINK SEC before working around this quality issue.
 
 ## Security
 
 ### report overview
-
-```
-
-```
