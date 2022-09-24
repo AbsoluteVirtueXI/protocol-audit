@@ -230,6 +230,11 @@ The keyword `mut` is used for let bindings which don't need to be mutable.
 Variables `key`, `data` and `iv` do not need to be mutable, remove `mut` keyword from the associated `let` bindings.  
 TODO: more info on `iv` meaning and type (static?);
 
+### Restricted portability due to the usage of `HOME` environment variable.
+
+At line 50 the usage of the `HOME` environment variable restrict the program to run correctly only on Linux/Unix/BSD based operating systems as this environment variable is only set by default on those OS.
+Use another environnement variable, and preferably an environnement variable created and set by the program itself.
+
 ### Program termination and exit code.
 
 The usage of the `std::process::exit` function, at line 53, is not needed as it is always called as the last statement of the program.  
@@ -279,11 +284,6 @@ mod tests {
 ```
 
 By following our recommendations in the `Modularity` section, unit tests can be written per module which permit a better granularity for testing software components.
-
-### Restricted portability due to the usage of `HOME` environment variable.
-
-At line 50 the usage of the `HOME` environment variable restrict the program to run correctly only on Linux/Unix/BSD based operating systems as this environment variable is only set by default on those OS.
-Use another environnement variable, and preferably an environnement variable created and set by the program itself.
 
 **Important Security Warning**:
 The line 50 `let password = env::var("HOME").unwrap();` introduce critical security vulnerabilities.  
