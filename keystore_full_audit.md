@@ -35,7 +35,7 @@ https://github.com/rust-dev-tools/fmt-rfcs/blob/master/guide/guide.md
 
 ## Cargo.toml
 
-### [package] section.
+### [package] section
 
 - Use a meaningful package name like `keystore` instead of `app2` for the field `name` or at least use a `[[bin]]` target to generate a binary with a meaningful name:
 
@@ -61,7 +61,7 @@ edition = "2021"
 - Important metadata are missing. `authors`, `license`, `repository`, `documentation`, and more fields should be filled with correct values.
   Please see https://doc.rust-lang.org/cargo/reference/manifest.html#the-package-section for more information.
 
-### [dependencies] section.
+### [dependencies] section
 
 - Remove commented dependency at line 10 and the useless blank line at line 11:
 
@@ -101,7 +101,7 @@ k256 = "0.11.5"
 
 `k256` is an unaudited package. We just showed how to get the last version of the package, but for security reason, and particularly for application using cryptography you should use an alternative. See our security analysis below for more information. TODO LINK TO SEC HERE.
 
-## Encapsulate `keystore_create` in `Keystore` struct as an associated function.
+## Encapsulate `keystore_create` in `Keystore` struct as an associated function
 
 The function `keystore_create` at line 20 should be an associated function implemented for the `Keystore` struct.
 As this function is a constructor that create `Keystore` instance, it is good practice to name it `new`.
@@ -119,7 +119,7 @@ in function `main` `Keystore` can now be instantiated with:
 let keystore = Keystore::new(password.as_str());
 ```
 
-## Add modularity by using the library crate for `Keystore` type and its associated methods and functions.
+## Add modularity by using the library crate for `Keystore` type and its associated methods and functions
 
 Library code and binary code should be separated to enhance modularity, readability and maintenance.
 `main.rs` should only contain minimum code to launch the program, and import modules, types and functionalities from the library crate (`lib.rs`).
@@ -195,7 +195,7 @@ fn main() {
 }
 ```
 
-## Inconsistency in code formatting.
+## Inconsistency in code formatting
 
 Readability can be improved by consistency in formatting and a 4 spaces indentation.
 Configure your IDE and install [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer) extension or install and use the [rustfmt](https://github.com/rust-lang/rustfmt) command line.
@@ -205,7 +205,7 @@ $ rustup component add rustfmt
 $ cargo fmt
 ```
 
-## Unused import `AeadDecryptor`.
+## Unused import `AeadDecryptor`
 
 At line 1, the import of `AeadDecryptor` trait from `crypto::aead` is not used.  
 Change line 1 to:
@@ -214,7 +214,7 @@ Change line 1 to:
 use crypto::aead::AeadEncryptor;
 ```
 
-## Import of `std::iter` and relative path `iter::repeat` and `iter::repeat_with`.
+## Import of `std::iter` and relative path `iter::repeat` and `iter::repeat_with`
 
 Relative path should be used for calling `repeat` and `repeat_with` functions.  
 The style in Rust is to import types, traits, and modules (std::iter) and then use relative paths to access the functions, constants, and other members within.
@@ -242,13 +242,13 @@ let mut output_tag: Vec<u8> = iter::repeat(0).take(16).collect();
 
 Same pattern should be applied for the `std::process` module and the function `exit`, but as we will see in [Redundant program termination scheme with a bad exit code](#redundant-program-termination-scheme-with-a-bad-exit-code), we recommend to remove the import of `std::process` and the call to the `exit` function.
 
-## Unused mutable let bindings.
+## Unused mutable let bindings
 
 The keyword `mut` is used for let bindings which don't need to be mutable.  
 Variables `key`, `data` and `iv` do not need to be mutable, remove `mut` keyword from the associated `let` bindings.  
 TODO LINK SEC: more info on `iv` meaning, type (static?) and security issue;
 
-## Restricted portability due to the usage of `HOME` environment variable.
+## Restricted portability due to the usage of `HOME` environment variable
 
 At line 50 the usage of the `HOME` environment variable restrict the program to run correctly only on Linux/Unix/BSD based operating systems as this environment variable is only set by default on those OS.  
 Use another environnement variable, and preferably an environnement variable created and set by the program itself.
@@ -257,7 +257,7 @@ Use another environnement variable, and preferably an environnement variable cre
 The line 50 `let password = env::var("HOME").unwrap();` introduces critical security vulnerabilities.  
 Please check TODO LINK SEC before working around this quality issue.
 
-## Unnecessary `let` binding `k`.
+## Unnecessary `let` binding `k`
 
 The `let` binding `k` defined at line 40 is returned directly at line 45 within `keystore_create` function.  
 It is extraneous code. Remove it to make your code more rusty and return directly the `Keystore` instantiation expression.
@@ -270,7 +270,7 @@ Keystore {
         }
 ```
 
-## Redundant program termination scheme with a bad exit code.
+## Redundant program termination scheme with a bad exit code
 
 Remove import `use std::process::exit;` at line 8 and remove the call of `exit` function at line 53.  
 The usage of the `std::process::exit` function, at line 53, is not needed as it is called as the last statement of the program.  
