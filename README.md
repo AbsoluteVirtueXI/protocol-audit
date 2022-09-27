@@ -3,7 +3,7 @@
 ## keystore
 
 - target: [keystore](./keystore/)  
-  the vulnerable program can be run with:
+  the vulnerable program can be executed with:
 
 ```zsh
 cargo run -p app2
@@ -12,7 +12,7 @@ cargo run -p app2
 - report: [keystore full audit](./keystore_full_audit.md)
 
 - correction: [keystore-update](./keystore-update/)  
-  the corrected version can be run with:
+  the corrected version can be executed with:
 
 ```zsh
 cargo run -p keystore-update
