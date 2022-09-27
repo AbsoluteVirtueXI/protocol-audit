@@ -16,7 +16,7 @@ cargo run -p app2
 launch the updated version with:
 
 ```zsh
-cargo run -p keystore
+cargo run -p keystore-update
 ```
 
 # Quality audit
