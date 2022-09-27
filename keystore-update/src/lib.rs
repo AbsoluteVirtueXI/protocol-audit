@@ -1,45 +1,55 @@
-use crypto::aead::AeadEncryptor;
-use crypto::aes_gcm::AesGcm;
-use k256::ecdsa::SigningKey;
-use rustc_serialize::hex::FromHex;
-use std::iter;
+use aes_gcm::{
+    aead::{Aead, KeyInit, OsRng, Payload},
+    AeadCore, Aes256Gcm,
+};
+use chrono::prelude::*;
+use rand::{self, RngCore};
 
-type Digest = String;
 type Key = String;
 
 #[derive(Debug)]
 pub struct Keystore {
-    digest: Digest,
-    sk: Key,
     pk: Key,
+    nonce: String,
+    aad: String,
 }
 
 impl Keystore {
-    pub fn new(password: &str) -> Keystore {
-        let digest = md5::compute(password);
+    pub fn new() -> Keystore {
+        let key = Aes256Gcm::generate_key(&mut OsRng);
 
-        let rnd: Vec<u8> = iter::repeat_with(|| fastrand::i8(..))
-            .take(32)
-            .map(|v| v as u8)
-            .collect();
-        let signing_key = SigningKey::from_bytes(&rnd);
-        let sk = signing_key.unwrap().to_bytes();
-        let key = digest.to_ascii_lowercase();
-        let data = sk.to_ascii_lowercase();
-        let data_add = sk;
-        let iv = "000000000000000000000000";
+        let cipher = Aes256Gcm::new_from_slice(&key).unwrap();
 
-        let key_size = crypto::aes::KeySize::KeySize128;
-        let mut aes = AesGcm::new(key_size, &key, &iv.from_hex().unwrap(), &data_add);
-        let mut output: Vec<u8> = iter::repeat(0).take(data.len()).collect();
-        let mut output_tag: Vec<u8> = iter::repeat(0).take(16).collect();
-        aes.encrypt(&data, &mut output[..], &mut output_tag[..]);
+        let mut rnd = vec![0u8; 32];
+        rand::thread_rng().fill_bytes(&mut rnd);
+
+        let data_add = Utc::now().to_string();
+
+        let payload = Payload {
+            msg: &rnd,
+            aad: data_add.as_bytes(),
+        };
+
+        let nonce = Aes256Gcm::generate_nonce(&mut OsRng);
+
+        let ciphertext = cipher.encrypt(&nonce, payload).unwrap();
+
+        println!(
+            "Save your encryption key in a secret place: {}",
+            hex::encode(&key)
+        );
 
         Keystore {
-            digest: format!("0x{}", hex::encode(digest.to_vec())),
-            sk: format!("0x{}", hex::encode(sk)),
-            pk: hex::encode(output),
+            pk: hex::encode(ciphertext),
+            nonce: hex::encode(nonce),
+            aad: data_add,
         }
+    }
+}
+
+impl Default for Keystore {
+    fn default() -> Self {
+        Keystore::new()
     }
 }
 
@@ -48,7 +58,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn should_create_keystore() {
-        /* code goes here */
+    fn should_encrypt_and_decrypt_secret() {
+        /* test here */
     }
 }

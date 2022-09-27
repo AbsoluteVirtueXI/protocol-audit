@@ -10,7 +10,7 @@ edition = "2018"
  
 k256="0.9.6"
 hex="0.4.3"
-rand_core="0.6.3"
+#rand_core="0.6.3"
 fastrand="1.7.0"
 md5="0.7.0"
 rust-crypto="0.2.0"

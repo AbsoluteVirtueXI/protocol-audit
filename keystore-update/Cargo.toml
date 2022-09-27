@@ -11,11 +11,10 @@ license = "MIT OR Apache-2.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-k256="0.9.6" #TODO UPGRADE HERE
-hex="0.4.3"
-rand_core="0.6.3"
-fastrand="1.7.0"
-md5="0.7.0"
-rust-crypto="0.2.0"
-rustc-serialize = "0.3"
-
+hex = "0.4.3"
+fastrand = "1.7.0"
+md5 = "0.7.0"
+sha2 = "0.10.6"
+rand = "0.8.5"
+aes-gcm = "0.10.1"
+chrono = "0.4.22"
