@@ -7,6 +7,18 @@ We provide first a code quality analysis without consideration of security flaws
 We follow then with a security analysis of the code.  
 A corrected version of the crate `keystore` with quality and security considerations applied can be found at [keystore-update](./keystore-update).
 
+launch the vulnerable version with:
+
+```zsh
+cargo run -p app2
+```
+
+launch the updated version with:
+
+```zsh
+cargo run -p keystore
+```
+
 # Quality audit
 
 Without an internal coding style and convention written for this project, we assume that rust official and community known conventions should be followed for rust syntax and design.  
@@ -20,13 +32,17 @@ https://github.com/rust-dev-tools/fmt-rfcs/blob/master/guide/guide.md
 - [Cargo.toml](#cargotoml)
   - [package section](#package-section)
   - [dependencies section](#dependencies-section)
+- [Inconsistency in code formatting](#inconsistency-in-code-formatting)
 - [Encapsulate `keystore_create` in `Keystore` struct as an associated function](#encapsulate-keystore_create-in-keystore-struct-as-an-associated-function)
 - [Add modularity by using the library crate for `Keystore` type and its associated methods and functions](#add-modularity-by-using-the-library-crate-for-keystore-type-and-its-associated-methods-and-functions)
-- [Inconsistency in code formatting](#inconsistency-in-code-formatting)
-- [Usage of external crate without import](#usage-of-external-crate-without-import)
 - [Unused import `AeadDecryptor`](#unused-import-aeaddecryptor)
 - [Import of `std::iter` and relative path `iter::repeat` and `iter::repeat_with`](#import-of-stditer-and-relative-path-iterrepeat-and-iterrepeat_with)
+- [Program panics if HOME environment variable is not found](#program-panics-if-home-environment-variable-is-not-found)
 - [Unused mutable let bindings](#unused-mutable-let-bindings)
+- [keystore_create should return a Result](#keystore_create-should-return-a-result)
+- [misuse of function fastrand::i8 line 23, can directly use fastrand::u8](#misuse-of-function-fastrandi8-line-23-can-directly-use-fastrandu8)
+- [Unneeded usage of ECDSA/secp256k1 signing key which implied useless type conversion](#unneeded-usage-of-ecdsasecp256k1-signing-key-which-implied-useless-type-conversion)
+- [vec! macro should be use for creating initialized vectors](#vec-macro-should-be-used-for-creating-initialized-vectors)
 - [Restricted portability due to the usage of `HOME` environment variable](#restricted-portability-due-to-the-usage-of-home-environment-variable)
 - [Unnecessary `let` binding `k`](#unnecessary-let-binding-k)
 - [Redundant program termination scheme with a bad exit code](#redundant-program-termination-scheme-with-a-bad-exit-code)
@@ -64,7 +80,7 @@ edition = "2021"
 
 ### [dependencies] section
 
-- Add spaces around the `=` between the crate name and the version.
+- Add spaces around the `=` between crate names and versions.
 
 - Remove commented dependency at line 9 and 13 and the useless blank line at line 11:
 
@@ -109,7 +125,7 @@ A better fix is to remove this dependency and don't use ECDSA/secp256k1 as it is
 - remove import of `rand_core` as it is not used.
 
 - `rustc-serialize` crate is deprecated, no more maintained and is no needed as `hex` crate provides already an associated function `hex::decode` for hex string to raw bytes conversion.
-  remove `rustc-serialize` dependencies from `Cargo.toml` and remove path import `use rustc_serialize::hex::FromHex;` at line 4.
+  remove `rustc-serialize` dependencies from `Cargo.toml` and remove path import `use rustc_serialize::hex::FromHex;` at line 4.  
   Replace line 35 with:
 
   ```rust
@@ -339,7 +355,7 @@ If ECDSA signing key is absolutely needed, please check security [Usage of unaud
 
 Moreover ` let data = sk.to_ascii_lowercase();` [introduce a high security risk](#critical-secret-key-collision) which is a good reason to remove it.
 
-## vec! macro should be use for creating initialized vectors.
+## vec! macro should be used for creating initialized vectors
 
 There is builtin way for creating initialized vectors in Rust.
 
@@ -357,7 +373,7 @@ let mut output = vec![0u8; rnd.len()];
 let mut output_tag = vec![0u8; 16];
 ```
 
-## Custom error should be created
+## Custom error enum should be created
 
 ## Restricted portability due to the usage of `HOME` environment variable
 
@@ -380,14 +396,6 @@ Keystore {
             pk: hex::encode(output),
         }
 ```
-
-## `println!` macro can crash command line program
-
-TODO:
-println! panics if it encounters an error, where as writeln!(io::stdout, "...")? properly propagates the error.
-
-use writeln! instead for error propagation.  
-read more: https://github.com/starship/starship/issues/885
 
 ## Redundant program termination scheme with a bad exit code
 
@@ -445,13 +453,26 @@ By following our recommendations in the [Add modularity by using the library cra
 **Security audit summary**:
 
 - [report overview](#report-overview)
+- [MEDIUM: fastrand crate is a weak random number generator](#medium-fastrand-crate-is-a-weak-random-number-generator)
+- [MEDIUM: A bigger key size than 128 bits can be used for the encryption](#medium-a-bigger-key-size-than-128-bits-can-be-used-for-the-encryption)
+- [CRITICAL: MD5 is an insecure cryptographic hash function](#critical-md5-is-an-insecure-cryptographic-hash-function)
+- [CRITICAL: Constant Initialization vector: iv = 000000000000000000000000 permit replay attack and forbidden attacks](#critical-constant-initialization-vector-iv--000000000000000000000000-permit-replay-attack-and-forbidden-attacks)
+- [HIGH: deprecated and unaudited crate rust-crypto](#high-deprecated-and-unaudited-crate-rust-crypto)
+- [HIGH: usage of unaudited K256 crate for secp256k1](#high-usage-of-unaudited-k256-crate-for-secp256k1)
+- [CRITICAL: Reproducible secret key with a seeded random number generator](#critical-reproducible-secret-key-with-a-seeded-random-number-generator)
+- [CRITICAL: HOME environnement variable can permit to find the password](#critical-home-environnement-variable-can-permit-to-find-the-password)
+- [CRITICAL: The secret key and the encryption key are stored in Keystore data structure](#critical-the-secret-key-and-the-encryption-key-are-stored-in-keystore-data-structure)
+- [CRITICAL: Loss of the user's keystore because it can't be deciphered anymore](#critical-loss-of-the-users-keystore-because-it-cant-be-deciphered-anymore)
+- [CRITICAL: usage of secret key as additional authenticated data](#critical-usage-of-secret-key-as-additional-authenticated-data)
+- [CRITICAL: encryption key collision](#critical-encryption-key-collision)
+- [CRITICAL: secret key collision](#critical-secret-key-collision)
 
 ## Report overview
 
-CRITICAL: 1 vulnerabilities
-HIGH:
-MEDIUM: 2 vulnerabilities
-LOW:
+**CRITICAL: 9 vulnerabilities**
+**HIGH: 2 vulnerabilities**
+**MEDIUM: 2 vulnerabilities**
+**LOW: 0 vulnerabilities**
 
 ## MEDIUM: fastrand crate is a weak random number generator
 
@@ -465,7 +486,7 @@ let mut rnd = vec![0u8; 32];
 rand::thread_rng().fill_bytes(&mut rnd);
 ```
 
-## MEDIUM: A bigger key size than 128 bits can be used for the encryption.
+## MEDIUM: A bigger key size than 128 bits can be used for the encryption
 
 line 34:
 
@@ -490,7 +511,7 @@ hasheur.update(password);
 let digest = hasheur.finalize();
 ```
 
-## CRITICAL: Constant Initialization vector: iv = 000000000000000000000000 permit replay attack and forbidden attacks.
+## CRITICAL: Constant Initialization vector: iv = 000000000000000000000000 permit replay attack and forbidden attacks
 
 The iv is a nonce that must be unique and used 1 time only.
 It permits to avoid replay attack and [forbidden attacks](https://csrc.nist.gov/csrc/media/projects/block-cipher-techniques/documents/bcm/joux_comments.pdf).  
@@ -528,7 +549,7 @@ let ciphertext = cipher.encrypt(&iv, payload).unwrap();
 The secp256k1 elliptic curve arithmetic contained in this crate has never been independently audited!  
 Use [rust-secp256k1](https://crates.io/crates/secp256k1) crate which is a rust wrapper on bitcoin's libsecp256k1.
 
-## CRITICAL: Reproductible secret key with a seeded random number generator
+## CRITICAL: Reproducible secret key with a seeded random number generator
 
 The random number generator is seeded which permit a reproducible generation of the secret key.
 the `rnd` buffer at line 23 will always contains the same bytes across different runs even on different environnement so the same secret key:
@@ -565,7 +586,7 @@ For remote attackers, the username can be found also by social engineering, brut
 
 We recommend to let the user enter its password at keystore creation with a check on a strong password pattern (special characters, numbers, mix of upper and lower case) or use a passphrase/seed phrase for seeding a prng.
 
-## CRITICAL: The secret key and the encryption key is stored in Keystore data structure
+## CRITICAL: The secret key and the encryption key are stored in Keystore data structure
 
 The secret key and encryption key must never be stored in memory or in a storage device.
 the secret key has to be recovered only from a decryption key only known by the user.
@@ -588,7 +609,7 @@ struct Keystore {
 
 Following [The secret key is stored in Keystore data structure](#critical-the-secret-key-is-stored-in-keystore-data-structure) `sk` field has to be removed.
 
-## CRITICAL: usage of secret key as additional authenticated data.
+## CRITICAL: usage of secret key as additional authenticated data
 
 The additional authenticated data is publicly available information that can be shared.  
 Don't use the secret key as aad, instead take aad from the environnement like program version and name, timestamp, etc..

@@ -2,13 +2,23 @@
 
 ## keystore
 
-target: link here
-the carget can be run with cargo run -p app2 (yes meaning less name app2 is part of the code quality report)
-report: link here
-correction: link here
-the corrected version can be run with cargo run -p keystore-update
+- target: [keystore](./keystore/)
+  the vulnerable program can be run with:
+
+```zsh
+cargo run -p app2
+```
+
+- report: [keystore full audit](./keystore_full_audit.md)
+
+correction: [keystore-update](./keystore-update/)
+the corrected version can be run with:
+
+```zsh
+cargo run -p keystore-update
+```
 
 ## bitcoin
 
-target: link here
-report: link here
+target: [module name](https://github.com/bitcoin/bitcoin/tree/master/src)
+report: [bitcoin code quality report](./bitcoin_quality_audit.md)
