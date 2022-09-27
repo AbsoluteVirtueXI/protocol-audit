@@ -15,7 +15,7 @@ pub struct Keystore {
 }
 
 impl Keystore {
-    pub fn new() -> Keystore {
+    pub fn create() -> (Key, Keystore) {
         let key = Aes256Gcm::generate_key(&mut OsRng);
 
         let cipher = Aes256Gcm::new_from_slice(&key).unwrap();
@@ -34,22 +34,14 @@ impl Keystore {
 
         let ciphertext = cipher.encrypt(&nonce, payload).unwrap();
 
-        println!(
-            "Save your encryption key in a secret place: {}",
-            hex::encode(&key)
-        );
-
-        Keystore {
-            pk: hex::encode(ciphertext),
-            nonce: hex::encode(nonce),
-            aad: data_add,
-        }
-    }
-}
-
-impl Default for Keystore {
-    fn default() -> Self {
-        Keystore::new()
+        (
+            hex::encode(key),
+            Keystore {
+                pk: hex::encode(ciphertext),
+                nonce: hex::encode(nonce),
+                aad: data_add,
+            },
+        )
     }
 }
 
