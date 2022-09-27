@@ -19,31 +19,18 @@ script/descriptor.cpp:1557:10: note: use reference type 'const Span<const unsign
 
 ## Cppcheck static code analysis
 
-`cppcheck` ran without a single warning or error:
+`cppcheck` ran without a single serious warning or error but with a lot of coding `style` errors.  
+We should check following the [coding style of Bitcoin](https://github.com/bitcoin/bitcoin/blob/master/doc/developer-notes.md) if these style errors follow their standard, if not, they should be fixed.
 
 ```zsh
-$ cppcheck src/script --force
-Checking src/script/bitcoinconsensus.cpp ...
-1/10 files checked 1% done
-Checking src/script/descriptor.cpp ...
-2/10 files checked 30% done
-Checking src/script/interpreter.cpp ...
-3/10 files checked 61% done
-Checking src/script/miniscript.cpp ...
-4/10 files checked 68% done
-Checking src/script/script.cpp ...
-5/10 files checked 72% done
-Checking src/script/script_error.cpp ...
-6/10 files checked 75% done
-Checking src/script/sigcache.cpp ...
-7/10 files checked 76% done
-Checking src/script/sign.cpp ...
-8/10 files checked 87% done
-Checking src/script/signingprovider.cpp ...
-9/10 files checked 90% done
-Checking src/script/standard.cpp ...
-10/10 files checked 100% done
+$ cppcheck --enable=all src/script --force -Isrc/script
 ```
+
+The notable errors from cppcheck output we should fixed are related to programming common sense:
+
+- Use iterators instead of raw for loops. It reduces errors, enhanced readability and often the generated code is more optimized.
+- Reduce scope of variable to the strict minimum.
+- Use reference to const to avoid a bad mutable behavior.
 
 ## clang-tidy static code analysis
 
