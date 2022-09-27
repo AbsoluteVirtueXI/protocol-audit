@@ -1,6 +1,6 @@
 # Code security and quality audit
 
-## keystore
+## keystore quality and security audit
 
 - target: [keystore](./keystore/)  
   the vulnerable program can be executed with:
@@ -18,7 +18,7 @@ cargo run -p app2
 cargo run -p keystore-update
 ```
 
-## bitcoin
+## Bitcoin Script quality audit
 
-- target: [module name](https://github.com/bitcoin/bitcoin/tree/master/src)
-- report: [bitcoin code quality report](./bitcoin_quality_audit.md)
+- target: [Script module](https://github.com/bitcoin/bitcoin/tree/master/src/script)
+- report: [bitcoin code quality report](./bitcoin_script_quality_audit.md)
