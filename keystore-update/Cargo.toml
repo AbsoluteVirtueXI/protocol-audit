@@ -12,9 +12,6 @@ license = "MIT OR Apache-2.0"
 
 [dependencies]
 hex = "0.4.3"
-fastrand = "1.7.0"
-md5 = "0.7.0"
-sha2 = "0.10.6"
 rand = "0.8.5"
 aes-gcm = "0.10.1"
 chrono = "0.4.22"
